@@ -1,0 +1,38 @@
+version: '3.0'
+services:
+  mysql_passbolt: 
+    container_name: mysql_passbolt
+    image: mysql:8
+    restart: always
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    ports:
+      - "${DATABASE_PORT}:3306" 
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD} 
+      MYSQL_DATABASE: ${DATABASE}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+
+  passbolt_tutilabs:
+    container_name: passbolt_container
+    image: passbolt/passbolt
+    restart: always
+    depends_on: 
+      - mysql_passbolt
+    environment:
+      - DATASOURCES_DEFAULT_HOST=mysql_passbolt
+      - DATASOURCES_DEFAULT_USERNAME=${DATABASE_USER}
+      - DATASOURCES_DEFAULT_PASSWORD=${DATABASE_PASSWORD} 
+      - DATASOURCES_DEFAULT_DATABASE=${DATABASE}
+      - EMAIL_DEFAULT_FROM=${EMAIL}
+      - EMAIL_TRANSPORT_DEFAULT_HOST=${EMAIL_HOST}
+      - EMAIL_TRANSPORT_DEFAULT_PORT=${EMAIL_PORT}
+      - EMAIL_TRANSPORT_DEFAULT_USERNAME=${EMAIL}
+      - EMAIL_TRANSPORT_DEFAULT_PASSWORD=${EMAIL_PASSWORD}
+      - EMAIL_TRANSPORT_DEFAULT_TLS=true
+      - PASSBOLT_KEY_EMAIL=${EMAIL}
+    volumes:
+      - ./passbolt_web:/usr/share/php/passbolt/webroot/img/public
+    command: ["/usr/bin/wait-for.sh", "-t", "0", "mysql_passbolt:3306", "--", "/docker-entrypoint.sh"]
+    ports:
+      - ${PASSBOLT_PORT}:80
