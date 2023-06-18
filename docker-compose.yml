@@ -13,7 +13,7 @@ services:
       MYSQL_DATABASE: ${DATABASE}
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
 
-  passbolt_tutilabs:
+  passbolt:
     container_name: passbolt_container
     image: passbolt/passbolt
     restart: always
